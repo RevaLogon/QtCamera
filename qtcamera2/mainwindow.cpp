@@ -309,6 +309,7 @@ void MainWindow::on_actionOpen_triggered()
         ui->imageLabel->setVisible(true);
         ui->pushButton_video_start->setEnabled(false);
         ui->pushButton_video_stop->setEnabled(false);
+        ui->pushButton_video_stop->setEnabled(false);
         ui->horizontalSlider_Time->setEnabled(false);
     } else if (suffix == "mov" || suffix == "mp4") {
         Video = new QVideoWidget();
@@ -320,7 +321,7 @@ void MainWindow::on_actionOpen_triggered()
         Video->show();
         ui->horizontalSlider_Time->setEnabled(true);
         ui->pushButton_video_start->setEnabled(true);
-        ui->pushButton_video_stop->setEnabled(true);
+        ui->pushButton_video_stop_2->setEnabled(true);
         ui->imageLabel->setVisible(false);
     } else {
         qWarning() << "Unsupported file format:" << fileName;
