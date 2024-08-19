@@ -27,6 +27,7 @@ public:
 
 private slots:
 
+    void cleanup();
 
     void durationChanged(qint64 duration);
 
@@ -39,7 +40,6 @@ private slots:
     void switchCamera(QAction *action);
 
     void on_pushButton_Camera_Devices_clicked();
-
 
     void on_pushButton_Start_Recording_clicked();
 
@@ -81,7 +81,6 @@ private:
     void start_CameraForImageCapture();
 
     void start_CameraForVideoRecording();
-
 
 
 

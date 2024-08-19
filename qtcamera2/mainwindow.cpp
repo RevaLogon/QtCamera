@@ -14,7 +14,6 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 
 {
-
     ui->setupUi(this);
 
 
@@ -50,6 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pushButton_Start_Recording->setEnabled(false);
     ui->pushButton_Stop_Recording->setEnabled(false);
     ui->pushButton_Stop_Camera->setEnabled(false);
+    ui->pushButton_video_stop_2->setEnabled(false);
     ui->pushButton_video_start->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     ui->pushButton_video_stop->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
     ui->pushButton_video_stop_2->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
@@ -101,6 +101,27 @@ void MainWindow::durationChanged(qint64 duration)
     mDuration= duration/1000;
     ui->horizontalSlider_Time->setMaximum(mDuration);
 
+}
+
+void MainWindow::cleanup()
+{
+    if (M_Camera_Image) {
+        M_Camera_Image->cancelCapture();
+        M_Camera_Image.reset();
+    }
+
+    if (M_Media_Recorder) {
+        M_Media_Recorder->stop();
+        M_Media_Recorder.reset();
+    }
+
+    if (Video) {
+        Video->hide();
+        delete Video;
+        Video = nullptr;
+    }
+
+    Player->stop();
 }
 
 void MainWindow::positionChanged(qint64 duration)
@@ -157,6 +178,7 @@ void MainWindow::stop_Camera()
     M_Camera.reset(new QCamera(QCameraInfo::defaultCamera()));
     ui->pushButton_Image_Capture->setEnabled(false);
     ui->pushButton_Start_Recording->setEnabled(false);
+    ui->pushButton_Stop_Recording->setEnabled(false);
 
 }
 
@@ -178,7 +200,6 @@ void MainWindow::updateDuration(qint64 Duration)
 void MainWindow::M_record()
 {
 
-
     static int callCount = 0;
     callCount++;
     qDebug() << "M_record called. Count:" << callCount;
@@ -186,8 +207,6 @@ void MainWindow::M_record()
     if (!M_Media_Recorder) {
         M_Media_Recorder.reset(new QMediaRecorder(M_Camera.data()));
     }
-    ui->pushButton_Start_Recording->setEnabled(false);
-    ui->pushButton_Stop_Recording->setEnabled(true);
     M_Media_Recorder->record();
     //  qDebug() << "Saving record to:" << "/home/kuzu/Videos";
 
@@ -268,11 +287,13 @@ void MainWindow::update_recorder_state(QMediaRecorder::State media_state)
 
 void MainWindow::on_pushButton_Start_Recording_clicked()
 {
+    //cleanup();
     M_Camera->setCaptureMode(QCamera::CaptureVideo);
     M_Media_Recorder.reset(new QMediaRecorder(M_Camera.data()));
     M_Media_Recorder->setMuted(true);
     M_record();
-
+    ui->pushButton_Start_Recording->setEnabled(false);
+    ui->pushButton_Stop_Recording->setEnabled(true);
 }
 
 
@@ -309,8 +330,8 @@ void MainWindow::on_actionOpen_triggered()
         ui->imageLabel->setVisible(true);
         ui->pushButton_video_start->setEnabled(false);
         ui->pushButton_video_stop->setEnabled(false);
-        ui->pushButton_video_stop->setEnabled(false);
         ui->horizontalSlider_Time->setEnabled(false);
+        ui->pushButton_video_stop_2->setEnabled(false);
     } else if (suffix == "mov" || suffix == "mp4") {
         Video = new QVideoWidget();
         Video->setGeometry(5, 5, ui->groupBox_Video->width() - 10, ui->groupBox_Video->height() - 10);
@@ -321,6 +342,7 @@ void MainWindow::on_actionOpen_triggered()
         Video->show();
         ui->horizontalSlider_Time->setEnabled(true);
         ui->pushButton_video_start->setEnabled(true);
+        ui->pushButton_video_stop->setEnabled(true);
         ui->pushButton_video_stop_2->setEnabled(true);
         ui->imageLabel->setVisible(false);
     } else {
@@ -365,6 +387,7 @@ void MainWindow::on_horizontalSlider_Time_valueChanged(int value)
 
 
 void MainWindow::on_pushButton_Image_Capture_clicked(){
+  //  cleanup();
     M_Camera->setCaptureMode(QCamera::CaptureStillImage);
     M_Camera_Image.reset(new QCameraImageCapture(M_Camera.data()));
     M_Camera_Image->setCaptureDestination(QCameraImageCapture::CaptureToFile);
@@ -387,4 +410,3 @@ void MainWindow::on_pushButton_video_stop_2_clicked()
 {
     Player->stop();
 }
-
